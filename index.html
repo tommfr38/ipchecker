@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IP Checker</title>
+  <title>IP Checker (IPv4)</title>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
@@ -40,7 +41,7 @@
     }
 
     h1 { font-weight: 700; font-size: 2em; margin-bottom: 8px; }
-    p { color: var(--secondary-text-color); margin-bottom: 30px; }
+    p  { color: var(--secondary-text-color); margin-bottom: 30px; }
 
     #actionButton {
       background-color: var(--accent-color);
@@ -58,11 +59,7 @@
 
     #actionButton:hover { background-color: var(--accent-hover-color); }
     #actionButton:active { transform: scale(0.98); }
-
-    #actionButton:disabled {
-      background-color: #555;
-      cursor: not-allowed;
-    }
+    #actionButton:disabled { background-color: #555; cursor: not-allowed; }
 
     .result-container {
       margin-top: 25px;
@@ -83,7 +80,6 @@
     }
 
     .error-message { color: #ff6b6b; font-weight: 600; }
-    .debug { margin-top: 10px; color: #aaa; font-size: 0.9em; white-space: pre-wrap; }
 
     .spinner {
       border: 4px solid rgba(255, 255, 255, 0.2);
@@ -101,56 +97,38 @@
 <body>
   <div class="ip-card">
     <h1>IP Checker</h1>
-    <p>Discover your public IP address with a single click.</p>
+    <p>Fetches your <strong>IPv4</strong> address.</p>
 
-    <button id="actionButton">Show My IP</button>
+    <button id="actionButton">Show My IPv4</button>
     <div class="result-container" id="resultContainer"></div>
-    <div class="debug" id="debug"></div>
   </div>
 
   <script>
-    const actionButton = document.getElementById('actionButton');
-    const resultContainer = document.getElementById('resultContainer');
-    const debugEl = document.getElementById('debug');
+    const actionButton = document.getElementById("actionButton");
+    const resultContainer = document.getElementById("resultContainer");
 
     async function showIP() {
       actionButton.disabled = true;
-      actionButton.textContent = 'Fetching...';
-      debugEl.textContent = '';
-
+      actionButton.textContent = "Fetching...";
       resultContainer.innerHTML = `<div class="spinner"></div>`;
 
       try {
-        // ✅ uses the endpoint you already confirmed works
-        const res = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
+        // ✅ IPv4-only endpoint
+        const res = await fetch("https://api4.ipify.org?format=json", { cache: "no-store" });
 
-        // If the server replies (even with 403/429), fetch DID NOT "fail to fetch".
-        // So we can show the status.
-        if (!res.ok) {
-          const text = await res.text().catch(() => '');
-          throw new Error(`HTTP ${res.status} ${res.statusText}\n${text.slice(0, 200)}`);
-        }
+        if (!res.ok) throw new Error("Network error");
 
         const data = await res.json();
-
-        if (!data || !data.ip) {
-          throw new Error('No IP field returned from API.');
-        }
-
         resultContainer.innerHTML = `<div id="ipDisplay">${data.ip}</div>`;
-        actionButton.textContent = 'Done!';
+        actionButton.textContent = "Done!";
       } catch (err) {
-        resultContainer.innerHTML = `<div class="error-message">Could not retrieve IP address.</div>`;
-        actionButton.textContent = 'Retry';
+        resultContainer.innerHTML = `<div class="error-message">Could not retrieve IPv4.</div>`;
+        actionButton.textContent = "Retry";
         actionButton.disabled = false;
-
-        // show real reason (super useful)
-        debugEl.textContent = String(err);
-        console.error(err);
       }
     }
 
-    actionButton.addEventListener('click', showIP);
+    actionButton.addEventListener("click", showIP);
   </script>
 </body>
 </html>
